@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Patungan DKMR AREA</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f5f7f4;--card:#fff;--tx:#14231b;--mu:#5d6d63;--pr:#0f7a4a;--pr2:#e3f4ea;--bd:#dde5df;--wa:#1faa59;--dg:#c0392b}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1511;--card:#17211b;--tx:#e8f1ea;--mu:#9bb0a2;--pr:#3ecf8e;--pr2:#183a29;--bd:#26362d;--dg:#ff7b6b}}
+:root[data-theme="dark"]{--bg:#0e1511;--card:#17211b;--tx:#e8f1ea;--mu:#9bb0a2;--pr:#3ecf8e;--pr2:#183a29;--bd:#26362d;--dg:#ff7b6b}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.5}
+.wrap{max-width:860px;margin:0 auto;padding:16px}
+.hero{background:linear-gradient(135deg,#0f7a4a,#0b5a37);color:#fff;border-radius:20px;padding:22px}
+.hero h1{margin:0 0 4px;font-size:1.5rem}.hero p{margin:0;opacity:.85;font-size:.92rem}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
+.stat{background:rgba(255,255,255,.14);border-radius:12px;padding:10px}.stat b{display:block;font-size:1.05rem}.stat span{font-size:.75rem;opacity:.85}
+nav{display:flex;gap:6px;margin:16px 0;overflow-x:auto}
+nav button{flex:1;white-space:nowrap}
+button,.btn{font:inherit;cursor:pointer;border:1px solid var(--bd);background:var(--card);color:var(--tx);padding:9px 14px;border-radius:12px}
+button.on,.pri{background:var(--pr);color:#fff;border-color:var(--pr)}
+.wa{background:var(--wa);color:#fff;border-color:var(--wa);text-decoration:none;display:inline-block;text-align:center}
+.dg{color:var(--dg)}.sm{padding:5px 10px;font-size:.8rem}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:16px;margin-bottom:12px}
+.card h3{margin:0 0 4px}.mu{color:var(--mu);font-size:.85rem}
+.bar{height:10px;border-radius:99px;background:var(--pr2);overflow:hidden;margin:10px 0 6px}.bar i{display:block;height:100%;background:var(--pr);border-radius:99px}
+.row{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.li{padding:10px 0;border-bottom:1px solid var(--bd)}.li:last-child{border:0}
+input,select,textarea{font:inherit;width:100%;padding:10px;border-radius:10px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);margin:4px 0 10px}
+label{font-size:.82rem;color:var(--mu)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}.chips button{padding:6px 12px;font-size:.85rem}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center;z-index:9;padding:0}
+.md{background:var(--card);width:100%;max-width:480px;max-height:92%;overflow:auto;border-radius:20px 20px 0 0;padding:18px;padding-bottom:calc(18px + env(safe-area-inset-bottom,0px))}
+@media(min-width:600px){.ov{align-items:center}.md{border-radius:20px}}
+.qr{text-align:center;background:#fff;border-radius:14px;padding:10px;margin:10px 0}.qr img{max-width:100%;width:290px;height:auto}
+.tot{font-size:1.6rem;font-weight:700;color:var(--pr);text-align:center}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#222;color:#fff;padding:10px 16px;border-radius:12px;z-index:20;font-size:.9rem}
+.tag{font-size:.72rem;background:var(--pr2);color:var(--pr);padding:2px 8px;border-radius:99px}
+footer{text-align:center;color:var(--mu);font-size:.78rem;padding:20px 0}
+</style>
+</head>
+<body>
+<div class="wrap"><div id="app"></div></div>
+<script id="state" type="application/json">{"org":"DKMR AREA","wa":"","qris":"/qris.jpg","campaigns":[{"id":"c1","title":"Kas & Patungan DKMR AREA","desc":"Dana bersama untuk kegiatan dan kebutuhan komunitas DKMR AREA.","target":5000000,"deadline":"","active":true}],"expenses":[]}</script>
+<script>
+let S=JSON.parse(document.getElementById('state').textContent);
+let showLogin=false,view='home',pay=null,isOwner=false,tt,me=null,canW=true,DON=[];
+const D=()=>DON;
+const $=s=>document.querySelector(s);
+const rp=n=>'Rp'+Number(n||0).toLocaleString('id-ID');
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const gid=()=>Math.random().toString(36).slice(2,9);
+const today=()=>new Date().toISOString().slice(0,10);
+const fmtD=d=>d?new Date(d).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'}):'';
+const ok=()=>D().filter(d=>d.status==='ok'),pend=()=>D().filter(d=>d.status==='pending');
+const sumC=id=>ok().filter(d=>d.cid===id).reduce((a,b)=>a+b.amt,0);
+const totIn=()=>ok().reduce((a,b)=>a+b.amt,0);
+const totPend=()=>pend().reduce((a,b)=>a+b.amt,0);
+async function api(m,p,b){const r=await fetch('/api'+p,{method:m,headers:{'content-type':'application/json'},body:b?JSON.stringify(b):undefined});const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||r.status);return j}
+async function load(){try{const [d,m]=await Promise.all([api('GET','/data'),api('GET','/me')]);Object.assign(S,d.config);DON=d.donations;me=m.user;isOwner=!!m.isAdmin;if(me&&pay&&!pay.name)pay.name=me.name}catch(e){toast('Gagal memuat data')}if(!pay)render()}
+const totOut=()=>S.expenses.reduce((a,b)=>a+b.amt,0);
+const cname=id=>(S.campaigns.find(c=>c.id===id)||{}).title||'-';
+
+function toast(m){clearTimeout(tt);let e=$('.toast');if(e)e.remove();e=document.createElement('div');e.className='toast';e.textContent=m;document.body.appendChild(e);tt=setTimeout(()=>e.remove(),2600)}
+
+async function save(){try{await api('PUT','/admin/state',{org:S.org,wa:S.wa,qris:S.qris,campaigns:S.campaigns,expenses:S.expenses});await load();toast('Tersimpan');return true}catch(e){toast('Gagal menyimpan: '+e.message);return false}}
+
+function render(){
+  const inn=totIn(),out=totOut();
+  let h=`<div class="hero"><h1>🤝 Patungan ${esc(S.org)}</h1><p>Gotong royong komunitas — transparan, mudah, pakai QRIS.</p>
+  <div class="stats"><div class="stat"><b>${rp(inn)}</b><span>Terkumpul${totPend()?' (+'+rp(totPend())+' menunggu)':''}</span></div><div class="stat"><b>${ok().length}</b><span>Terverifikasi${pend().length?' · +'+pend().length+' menunggu':''}</span></div><div class="stat"><b>${rp(inn-out)}</b><span>Saldo kas</span></div></div></div>
+  <nav>${[['home','Patungan'],['donors','Donatur'],['trans','Transparansi']].concat(isOwner?[['admin','⚙ Admin']]:[]).map(t=>`<button data-act="tab" data-v="${t[0]}" class="${view===t[0]?'on':''}">${t[1]}</button>`).join('')}${isOwner?'':'<a class="btn" style="text-decoration:none;white-space:nowrap" href="/api/auth/login">🔐 Login Admin (Discord)</a>'}${me?'<button data-act="logout">Keluar ('+esc(me.name)+')</button>':''}</nav>`;
+  h+=view==='home'?vHome():view==='donors'?vDonors():view==='trans'?vTrans():vAdmin();
+  h+=`<footer>© ${esc(S.org)} · Pembayaran via QRIS · Diverifikasi admin</footer>`;
+  if(pay)h+=vPay();
+  $('#app').innerHTML=h;
+}
+
+function vHome(){
+  const cs=S.campaigns;if(!cs.length)return '<div class="card mu">Belum ada kampanye patungan.</div>';
+  return cs.map(c=>{const g=sumC(c.id),p=c.target?Math.min(100,Math.round(g/c.target*100)):0,n=ok().filter(d=>d.cid===c.id).length;
+    return `<div class="card"><div class="row"><h3>${esc(c.title)}</h3>${c.active?'':'<span class="tag">Ditutup</span>'}</div>
+    <div class="mu">${esc(c.desc)}</div><div class="bar"><i style="width:${p}%"></i></div>
+    <div class="row"><b>${rp(g)}</b><span class="mu">${c.target?'dari '+rp(c.target)+' ('+p+'%)':''}</span></div>
+    <div class="mu">${n} donatur${c.deadline?' · batas '+fmtD(c.deadline):''}</div>
+    ${c.active?`<button class="pri" style="width:100%;margin-top:12px" data-act="pay" data-id="${c.id}">Patungan Sekarang</button>`:''}</div>`}).join('');
+}
+
+function vPay(){
+  const c=S.campaigns.find(x=>x.id===pay.cid);
+  let b=`<div class="ov" data-act="closeov"><div class="md"><div class="row"><h3 style="margin:0">Patungan: ${esc(c.title)}</h3><button class="sm" data-act="close">✕</button></div>`;
+  if(pay.step===1){
+    b+=`<label>Nominal (Rp)</label><input id="p-amt" type="number" inputmode="numeric" min="1000" placeholder="contoh 25000" value="${pay.amt||''}">
+    <div class="chips">${[10000,25000,50000,100000,200000].map(v=>`<button data-act="chip" data-v="${v}">${rp(v)}</button>`).join('')}</div>
+    <label>Nama</label><input id="p-name" placeholder="Nama kamu" value="${esc(pay.name)}">
+    <label><input id="p-anon" type="checkbox" style="width:auto;margin-right:6px" ${pay.anon?'checked':''}>Sembunyikan nama (Hamba Allah / anonim)</label>
+    <label style="display:block;margin-top:10px">Pesan (opsional)</label><textarea id="p-msg" rows="2">${esc(pay.msg)}</textarea>
+    <button class="pri" style="width:100%" data-act="next">Lanjut ke QRIS</button>`;
+  }else if(pay.step===3){
+    b+=`<div style="text-align:center;padding:20px 0"><div style="font-size:3rem">🎉</div><h3>Terima kasih, ${esc(pay.name)}!</h3><p class="mu">Patungan ${rp(pay.amt+pay.uniq)} sudah tercatat atas namamu dan menunggu verifikasi admin.</p><button class="pri" data-act="close">Selesai</button></div>`;
+  }else{
+    const total=pay.amt+pay.uniq;
+    const msg=`Halo admin ${S.org}, saya ${pay.name||'-'} sudah patungan ${rp(total)} untuk "${c.title}". Berikut bukti transfernya.`;
+    b+=`<p class="mu" style="margin:6px 0">Scan QRIS, lalu bayar <b>tepat</b> nominal di bawah (termasuk kode unik agar mudah dicocokkan admin).</p>
+    <div class="tot">${rp(total)}</div><div class="mu" style="text-align:center">Patungan ${rp(pay.amt)} + kode unik ${pay.uniq}</div>
+    <div class="qr">${S.qris?`<img src="${S.qris}" alt="QRIS ${esc(S.org)}">`:'<p style="color:#555">QRIS belum diunggah admin.</p>'}</div>
+    <div class="row" style="gap:8px"><button style="flex:1" data-act="copy" data-v="${total}">Salin nominal</button>${S.qris?'<a class="btn" style="flex:1;text-align:center;text-decoration:none" href="'+S.qris+'" download="QRIS-'+esc(S.org)+'.png">Unduh QRIS</a>':''}</div>
+    <p class="mu">Setelah bayar, kirim bukti transfer ke admin supaya donasi tercatat di daftar donatur.</p>
+    ${canW?`<button class="pri" style="width:100%;margin-bottom:8px" data-act="paid">✅ Saya sudah bayar — catat nama saya</button>`:'<p class="mu dg">Untuk mencatat nama otomatis, kamu perlu masuk (login) dengan akses kontributor dari admin. Sementara itu konfirmasi lewat WhatsApp.</p>'}
+    ${S.wa?`<a class="btn ${canW?'':'wa'}" style="width:100%" target="_blank" rel="noopener" href="https://wa.me/${esc(S.wa)}?text=${encodeURIComponent(msg)}">${canW?'Kirim bukti ke WhatsApp (opsional)':'Konfirmasi via WhatsApp'}</a>`:''}
+    <button style="width:100%;margin-top:8px" data-act="back">← Ubah nominal</button>`;
+  }
+  return b+'</div></div>';
+}
+
+function vDonors(){
+  const agg={};ok().filter(d=>!d.anon).forEach(d=>{const k=d.name.trim().toLowerCase();agg[k]=agg[k]||{n:d.name,a:0};agg[k].a+=d.amt});
+  const top=Object.values(agg).sort((a,b)=>b.a-a.a).slice(0,5);
+  const list=D().filter(d=>d.status!=='rejected').sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  return `<div class="card"><h3>🏆 Donatur Teratas</h3>${top.length?top.map((t,i)=>`<div class="li row"><span>${i+1}. ${esc(t.n)}</span><b>${rp(t.a)}</b></div>`).join(''):'<div class="mu">Belum ada data.</div>'}</div>
+  <div class="card"><h3>Riwayat Patungan</h3>${list.length?list.map(d=>`<div class="li"><div class="row"><b>${d.anon?'Hamba Allah':esc(d.name)} ${d.status==='pending'?'<span class="tag" style="background:#fff3cd;color:#8a6d00">menunggu verifikasi</span>':''}</b><b>${rp(d.amt)}</b></div><div class="mu">${esc(cname(d.cid))} · ${fmtD(d.date)}</div>${d.msg?`<div class="mu">“${esc(d.msg)}”</div>`:''}</div>`).join(''):'<div class="mu">Belum ada patungan tercatat.</div>'}</div>`;
+}
+
+function vTrans(){
+  const ex=[...S.expenses].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  return `<div class="card"><h3>Ringkasan Kas</h3><div class="li row"><span>Total masuk</span><b>${rp(totIn())}</b></div><div class="li row"><span>Total keluar</span><b>${rp(totOut())}</b></div><div class="li row"><span>Saldo</span><b style="color:var(--pr)">${rp(totIn()-totOut())}</b></div></div>
+  <div class="card"><h3>Pengeluaran</h3>${ex.length?ex.map(e=>`<div class="li"><div class="row"><b>${esc(e.desc)}</b><b>-${rp(e.amt)}</b></div><div class="mu">${esc(cname(e.cid))} · ${fmtD(e.date)}</div></div>`).join(''):'<div class="mu">Belum ada pengeluaran.</div>'}</div>`;
+}
+
+function vAdmin(){
+  const opts=S.campaigns.map(c=>`<option value="${c.id}">${esc(c.title)}</option>`).join('');
+  const pd=pend().sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  return `<div class="card"><h3>Menunggu Verifikasi (${pd.length})</h3><div class="mu">Cocokkan dengan mutasi QRIS: nominal + kode unik.</div>${pd.map(d=>`<div class="li"><div class="row"><b>${esc(d.name)}${d.anon?' (anonim)':''}${d.dc?' · @'+esc(d.dc):''}</b><b>${rp(d.total||d.amt)}</b></div><div class="mu">${esc(cname(d.cid))} · ${fmtD(d.date)}${d.msg?' · “'+esc(d.msg)+'”':''}</div><div style="margin-top:6px"><button class="sm pri" data-act="okd" data-uid="${d.uid}" data-id="${d.id}">Verifikasi</button> <button class="sm dg" data-act="deld" data-uid="${d.uid}" data-id="${d.id}">Tolak</button></div></div>`).join('')||'<div class="mu">Tidak ada.</div>'}</div>
+  <div class="card"><h3>Pengaturan</h3><label>Nama komunitas</label><input id="a-org" value="${esc(S.org)}">
+  <label>No. WhatsApp admin (format 628xxxx)</label><input id="a-wa" inputmode="numeric" value="${esc(S.wa)}">
+  <label>Upload gambar QRIS AllPayment</label><input id="a-qr" type="file" accept="image/*">
+  ${S.qris?`<div class="qr"><img src="${S.qris}" style="width:160px"></div>`:''}
+  <button class="pri" data-act="setcfg">Simpan pengaturan</button></div>
+  <div class="card"><h3>Kampanye Baru</h3><label>Judul</label><input id="k-t"><label>Deskripsi</label><textarea id="k-d" rows="2"></textarea>
+  <label>Target (Rp, kosongkan jika tanpa target)</label><input id="k-g" type="number"><label>Batas waktu</label><input id="k-dl" type="date">
+  <button class="pri" data-act="addc">Tambah kampanye</button>
+  ${S.campaigns.map(c=>`<div class="li row"><span>${esc(c.title)} ${c.active?'':'<span class="tag">Ditutup</span>'}</span><span><button class="sm" data-act="togc" data-id="${c.id}">${c.active?'Tutup':'Buka'}</button> <button class="sm dg" data-act="delc" data-id="${c.id}">Hapus</button></span></div>`).join('')}</div>
+  <div class="card"><h3>Catat Donasi Masuk (sudah dikonfirmasi)</h3><label>Kampanye</label><select id="d-c">${opts}</select>
+  <label>Nama</label><input id="d-n"><label>Nominal (Rp, tanpa kode unik)</label><input id="d-a" type="number"><label>Pesan</label><input id="d-m">
+  <label><input id="d-an" type="checkbox" style="width:auto;margin-right:6px">Anonim</label><br><br><button class="pri" data-act="addd">Catat donasi</button>
+  ${ok().slice(-8).reverse().map(d=>`<div class="li row"><span>${esc(d.name)} · ${rp(d.amt)}</span><button class="sm dg" data-act="deld" data-uid="${d.uid}" data-id="${d.id}">Hapus</button></div>`).join('')}</div>
+  <div class="card"><h3>Catat Pengeluaran</h3><label>Kampanye</label><select id="e-c">${opts}</select><label>Keterangan</label><input id="e-d"><label>Nominal (Rp)</label><input id="e-a" type="number">
+  <button class="pri" data-act="adde">Catat pengeluaran</button>
+  ${S.expenses.slice(-8).reverse().map(e=>`<div class="li row"><span>${esc(e.desc)} · ${rp(e.amt)}</span><button class="sm dg" data-act="dele" data-id="${e.id}">Hapus</button></div>`).join('')}</div>`;
+}
+
+function readPay(){if(!pay||pay.step!==1)return;const g=i=>document.getElementById(i);pay.amt=parseInt(g('p-amt').value)||0;pay.name=g('p-name').value;pay.anon=g('p-anon').checked;pay.msg=g('p-msg').value}
+const v=id=>(document.getElementById(id)||{}).value||'';
+
+document.addEventListener('click',async e=>{
+  const t=e.target.closest('[data-act]');if(!t)return;
+  const a=t.dataset.act,id=t.dataset.id;
+  if(a==='closeov'&&e.target!==t)return;
+  if(a==='logout'){location.href='/api/auth/logout';return}
+  if(a==='login'){showLogin=true;render();return}
+  if(a==='closelogin'){if(a==='closelogin'&&e.target!==t&&t.classList.contains('ov'))return;showLogin=false;render();return}
+  if(a==='goadmin'){showLogin=false;view='admin';render();return}
+  if(a==='reload'){location.reload();return}
+  if(a==='tab'){view=t.dataset.v;render();return}
+  if(a==='pay'){pay={cid:id,step:1,amt:0,name:me?me.name:'',anon:false,msg:'',uniq:0};render();return}
+  if(a==='close'||a==='closeov'){pay=null;render();return}
+  if(a==='chip'){document.getElementById('p-amt').value=t.dataset.v;return}
+  if(a==='next'){readPay();if(pay.amt<1000){toast('Minimal Rp1.000');return}if(!pay.name.trim()){toast('Isi nama dulu');return}pay.uniq=Math.floor(Math.random()*99)+1;pay.step=2;render();return}
+  if(a==='back'){pay.step=1;render();return}
+  if(a==='copy'){try{await navigator.clipboard.writeText(t.dataset.v);toast('Nominal disalin')}catch(_){toast('Salin manual: '+t.dataset.v)}return}
+  if(a==='paid'){const c=pay;try{await api('POST','/donations',{cid:c.cid,name:c.name.trim(),amt:c.amt,uniq:c.uniq,msg:c.msg,anon:c.anon});pay.step=3;await load();render()}catch(x){toast('Gagal mencatat: '+x.message)}return}
+  if(!isOwner)return;
+  if(a==='setcfg'){S.org=v('a-org')||S.org;S.wa=v('a-wa').replace(/\D/g,'').replace(/^0/,'62');
+    const f=document.getElementById('a-qr').files[0];
+    if(f){const img=new Image();img.onload=async()=>{const m=720,r=Math.min(1,m/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=img.width*r;c.height=img.height*r;c.getContext('2d').drawImage(img,0,0,c.width,c.height);S.qris=c.toDataURL('image/png');await save()};img.src=URL.createObjectURL(f)}
+    else await save();return}
+  if(a==='addc'){if(!v('k-t').trim()){toast('Isi judul');return}S.campaigns.push({id:gid(),title:v('k-t').trim(),desc:v('k-d'),target:parseInt(v('k-g'))||0,deadline:v('k-dl'),active:true});await save();return}
+  if(a==='togc'){const c=S.campaigns.find(x=>x.id===id);c.active=!c.active;await save();return}
+  if(a==='delc'){if(confirm('Hapus kampanye beserta donasi & pengeluarannya?')){S.campaigns=S.campaigns.filter(x=>x.id!==id);S.expenses=S.expenses.filter(x=>x.cid!==id);await save()}return}
+  if(a==='addd'){const amt=parseInt(v('d-a'));if(!amt||!v('d-n').trim()||!v('d-c')){toast('Lengkapi data');return}try{await api('POST','/admin/donations',{cid:v('d-c'),name:v('d-n').trim(),amt,msg:v('d-m'),anon:document.getElementById('d-an').checked});await load();toast('Donasi dicatat')}catch(x){toast('Gagal: '+x.message)}return}
+  if(a==='okd'){try{await api('POST','/admin/donations/'+id+'/verify');await load();toast('Terverifikasi')}catch(x){toast('Gagal: '+x.message)}return}
+  if(a==='deld'){try{await api('DELETE','/admin/donations/'+id);await load()}catch(x){toast('Gagal: '+x.message)}return}
+  if(a==='adde'){const amt=parseInt(v('e-a'));if(!amt||!v('e-d').trim()||!v('e-c')){toast('Lengkapi data');return}S.expenses.push({id:gid(),cid:v('e-c'),desc:v('e-d').trim(),amt,date:today()});await save();return}
+  if(a==='dele'){S.expenses=S.expenses.filter(x=>x.id!==id);await save();return}
+});
+
+render();
+load();
+</script>
+</body>
+</html>
